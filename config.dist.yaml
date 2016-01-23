@@ -1,0 +1,13 @@
+General:
+    dummy: False
+AccessPoints:
+    LocationOne:
+        ip: 127.0.0.1
+        username: "username"
+        password: "password"
+        usePubKeyAuth: false
+    LocationTwo:
+        ip: 127.0.0.1
+        username: "username"
+        password: ""
+        usePubKeyAuth: true
