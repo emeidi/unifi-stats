@@ -12,9 +12,11 @@ import json
 # Configuration
 verbose=False
 
-configPath = os.path.dirname(__file__) + '/config.yaml'
+scriptPath = os.path.dirname(os.path.abspath(__file__))
 
-debugPath = os.path.dirname(__file__) + '/debug.txt'
+configPath = scriptPath + '/config.yaml'
+
+debugPath = scriptPath + '/debug.txt'
 debugFile = codecs.open(debugPath,'w','utf-8')
 
 def d(msg):
