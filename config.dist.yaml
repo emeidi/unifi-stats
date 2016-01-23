@@ -1,13 +1,13 @@
 General:
     dummy: False
 AccessPoints:
-    LocationOne:
+    LocationOneWithCredentialAuth:
         ip: 127.0.0.1
         username: "username"
         password: "password"
-        usePubKeyAuth: false
-    LocationTwo:
+        privatekeypath: ""
+    LocationTwoWithKeyBasedAuth:
         ip: 127.0.0.1
         username: "username"
         password: ""
-        usePubKeyAuth: true
+        privatekeypath: "./id_pub_rsa"

@@ -25,16 +25,18 @@ def d(msg):
 	
 	print msg
 
-def UniFiMcaDump(ip,username,password,usePubKeyAuth):
+def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
 	try:
 		ssh = paramiko.SSHClient()
 		ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 		
-		if not usePubKeyAuth:
+		if len(privateKeyPath) > 0:
+			d('Using private key at "' + privateKeyPath + '"')
+			pkey = paramiko.RSAKey.from_private_key_file(privateKeyPath)
+			ssh.connect(ip, username=username, pkey=pkey)
+		else:
 			d('Connecting to ' + ip + ' with username=' + username + ' and password=' + "*" * len(password))
 			ssh.connect(ip, username=username, password=password)
-		else:
-			ssh.connect(ip)
 		
 		d("Connected to " + ip)
 	#except paramiko.AuthenticationException:
@@ -316,7 +318,7 @@ aps = config['AccessPoints']
 #print(aps)
 #sys.exit(1)
 
-reqs = ['ip','usePubKeyAuth','username','password']
+reqs = ['ip','username','password','privatekeypath']
 for (apName, ap) in aps.items():
 	skipAp = False
 	#apName = str(apName)
@@ -337,7 +339,7 @@ for (apName, ap) in aps.items():
 	ip = ap['ip']
 	username = ap['username']
 	password = ap['password']
-	usePubKeyAuth = ap['usePubKeyAuth']
+	privatekeypath = ap['privatekeypath']
 	
 	if len(ipOnly) > 0:
 		d('Query single access point enabled by command line switch. Checking if this is the one.')
@@ -347,7 +349,7 @@ for (apName, ap) in aps.items():
 			continue
 	
 	d('Connecting to access point "' + apName + '" with IP "' + ip + '"')
-	jsonRaw = UniFiMcaDump(ip,username,password,usePubKeyAuth)
+	jsonRaw = UniFiMcaDump(ip,username,password,privatekeypath)
 	#print jsonRaw
 	
 	json = json.loads(jsonRaw)
