@@ -12,9 +12,9 @@ import json
 # Configuration
 verbose=False
 
-configPath = './config.yaml'
+configPath = os.path.dirname(__file__) + '/config.yaml'
 
-debugPath="./debug.txt"
+debugPath = os.path.dirname(__file__) + '/debug.txt'
 debugFile = codecs.open(debugPath,'w','utf-8')
 
 def d(msg):
@@ -31,7 +31,10 @@ def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
 		ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 		
 		if len(privateKeyPath) > 0:
-			d('Using private key at "' + privateKeyPath + '"')
+			privateKeyPathOrig = privateKeyPath
+			privateKeyPath = os.path.abspath(privateKeyPath)
+			
+			d('Using private key at "' + privateKeyPath + '" (non-absolutized path: "' + privateKeyPathOrig + '")')
 			pkey = paramiko.RSAKey.from_private_key_file(privateKeyPath)
 			ssh.connect(ip, username=username, pkey=pkey)
 		else:
