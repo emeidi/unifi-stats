@@ -34,7 +34,7 @@ def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
 		
 		if len(privateKeyPath) > 0:
 			privateKeyPathOrig = privateKeyPath
-			privateKeyPath = os.path.abspath(privateKeyPath)
+			privateKeyPath = os.path.abspath(scriptPath + '/' + privateKeyPath)
 			
 			d('Using private key at "' + privateKeyPath + '" (non-absolutized path: "' + privateKeyPathOrig + '")')
 			pkey = paramiko.RSAKey.from_private_key_file(privateKeyPath)
