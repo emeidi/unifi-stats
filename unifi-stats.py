@@ -304,7 +304,7 @@ if not os.path.isfile(configPath):
 	d('Config file "' + configPath + '" not found. Aborting.')
 	sys.exit(1)
 
-with open('config.yaml', 'r') as stream:
+with open(configPath, 'r') as stream:
     config = yaml.load(stream)
 
 # General Config
