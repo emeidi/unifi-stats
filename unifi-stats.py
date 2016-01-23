@@ -80,6 +80,182 @@ def parseDumpClients(json):
 		
 		data[interface] = vap['num_sta']
 	
+	data['all'] = sum(data.values())
+	
+	return data
+
+def parseDumpBytes(json):
+	data = {}
+
+	vaps = json['vap_table']
+	for vap in vaps:
+		interface = vap['name']
+		d('Looking at radio interface "' + interface + '"')
+
+		if args.interface:
+			d('Only a specific radio interface is selected, checking')
+			if args.interface != interface:
+				continue
+
+		if not vap['rx_bytes']:
+			d('vap[rx_bytes] not set for interface ' + interface + '. Skipping.')
+			continue
+
+		data[interface] = vap['rx_bytes']
+	
+	
+	data['all'] = sum(data.values())
+	
+	return data
+
+def parseDumpPackets(json):
+	data = {}
+
+	vaps = json['vap_table']
+	for vap in vaps:
+		interface = vap['name']
+		d('Looking at radio interface "' + interface + '"')
+
+		if args.interface:
+			d('Only a specific radio interface is selected, checking')
+			if args.interface != interface:
+				continue
+
+		if not vap['rx_packets']:
+			d('vap[rx_bytes] not set for interface ' + interface + '. Skipping.')
+			continue
+
+		data[interface] = vap['rx_packets']
+
+	data['all'] = sum(data.values())
+
+	return data
+
+def parseDumpErrors(json):
+	data = {}
+
+	vaps = json['vap_table']
+	for vap in vaps:
+		interface = vap['name']
+		d('Looking at radio interface "' + interface + '"')
+
+		if args.interface:
+			d('Only a specific radio interface is selected, checking')
+			if args.interface != interface:
+				continue
+
+		if not vap['rx_errors']:
+			d('vap[rx_errors] not set for interface ' + interface + '. Skipping.')
+			continue
+
+		data[interface] = vap['rx_errors']
+
+	data['all'] = sum(data.values())
+
+	return data
+
+def parseDumpRssi_Low(json):
+	data = {}
+	
+	default = 9999
+	
+	vaps = json['vap_table']
+	for vap in vaps:
+		interface = vap['name']
+		d('Looking at radio interface "' + interface + '"')
+
+		if args.interface:
+			d('Only a specific radio interface is selected, checking')
+			if args.interface != interface:
+				continue
+		
+		low = default
+		clients = vap['sta_table']
+		for client in clients:
+			MAC = client['mac']
+			d('Looking at client with MAC "' + MAC + '"')
+			
+			if not client['rssi']:
+				d('client[rssi] not set for interface ' + interface + '. Skipping.')
+				continue
+			
+			rssi = client['rssi']
+			if rssi < low:
+				d('RSSI ' + str(rssi) + ' is worse than ' + str(low) + '. Selecting this client as new low.')
+				low = rssi
+			else:
+				d('RSSI ' + str(rssi) + ' is better than ' + str(low) + '. Skipping this client.')
+		
+		if low == default:
+			low = 0
+		
+		data[interface] = low
+	
+	low = default
+	for val in data.values():
+		if val < 1:
+			continue
+		
+		if val < low:
+			low = val
+	
+	if low == default:
+		low = 0
+	
+	data['all'] = low
+
+	return data
+
+def parseDumpRssi_High(json):
+	data = {}
+
+	default = 0
+
+	vaps = json['vap_table']
+	for vap in vaps:
+		interface = vap['name']
+		d('Looking at radio interface "' + interface + '"')
+
+		if args.interface:
+			d('Only a specific radio interface is selected, checking')
+			if args.interface != interface:
+				continue
+
+		high = default
+		clients = vap['sta_table']
+		for client in clients:
+			MAC = client['mac']
+			d('Looking at client with MAC "' + MAC + '"')
+
+			if not client['rssi']:
+				d('client[rssi] not set for interface ' + interface + '. Skipping.')
+				continue
+
+			rssi = client['rssi']
+			if rssi > high:
+				d('RSSI ' + str(rssi) + ' is better than ' + str(high) + '. Selecting this client as new high.')
+				high = rssi
+			else:
+				d('RSSI ' + str(rssi) + ' is worse than ' + str(high) + '. Skipping this client.')
+
+		if high == default:
+			high = 0
+
+		data[interface] = high
+
+	high = default
+	for val in data.values():
+		if val < 1:
+			continue
+
+		if val > high:
+			high = val
+
+	if high == default:
+		high = 0
+
+	data['all'] = high
+
 	return data
 
 def printCacti(data):
@@ -97,7 +273,7 @@ parser = argparse.ArgumentParser(description='Query UniFi access point(s) for us
 
 parser.add_argument('--ip', metavar='STRING', help='The IP address of a single access point to query. If none is submitted', required=False)
 parser.add_argument('--interface', metavar='STRING', help='Which radio interface to select (e.g. ath4). If none is selected, data for all interfaces is returned.', required=False)
-parser.add_argument('--output', metavar='[clients|throughput|errors|rssi]', choices=['clients','throughput','errors','rssi'], help='What specific data to output', required=True)
+parser.add_argument('--output', metavar='[clients|bytes|packets|errors|rssi_low|rssi_high]', choices=['clients','bytes','packets','errors','rssi_low','rssi_high'], help='What specific data to output', required=True)
 parser.add_argument('--output-format', metavar='[cacti]', choices=['cacti'], help='The output format for results. Currently only cacti is supported', required=False)
 parser.add_argument('--verbose', help='Print debug information', action="store_true", required=False)
 
@@ -180,6 +356,5 @@ for (apName, ap) in aps.items():
 	#print data
 	
 	printCacti(data)
-	
-d('Preliminary end')
+
 sys.exit(0)
