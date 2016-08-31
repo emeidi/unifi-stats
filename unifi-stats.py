@@ -320,6 +320,7 @@ if args.verbose:
 	verbose = True
 
 if args.enablewait:
+	d('Enabling random wait as requested by command line')
 	enableWait = True
 
 if args.ip:
