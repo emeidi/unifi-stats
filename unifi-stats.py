@@ -9,6 +9,7 @@ import yaml
 import codecs
 import paramiko
 import json
+import random
 
 # Configuration
 verbose=False
@@ -304,9 +305,11 @@ parser = argparse.ArgumentParser(description='Query UniFi access point(s) for us
 
 parser.add_argument('--ip', metavar='STRING', help='The IP address of a single access point to query. If none is submitted', required=False)
 parser.add_argument('--interface', metavar='STRING', help='Which radio interface to select (e.g. ath4). If none is selected, data for all interfaces is returned.', required=False)
+parser.add_argument('--enablewait', help='Enable a randomly chosen wait period to prevent race conditions when using JSON cache', action="store_true", required=False)
 parser.add_argument('--output', metavar='[clients|bytes|packets|errors|rssi_low|rssi_high]', choices=['clients','bytes','packets','errors','rssi_low','rssi_high'], help='What specific data to output', required=True)
 parser.add_argument('--output-format', metavar='[cacti]', choices=['cacti'], help='The output format for results. Currently only cacti is supported', required=False)
 parser.add_argument('--verbose', help='Print debug information', action="store_true", required=False)
+
 
 args = parser.parse_args()
 
@@ -315,6 +318,9 @@ args = parser.parse_args()
 if args.verbose:
 	d('Enabling command line verbosity as requested by command line')
 	verbose = True
+
+if args.enablewait:
+	enableWait = True
 
 if args.ip:
 	ipOnly = args.ip
@@ -376,6 +382,11 @@ for (apName, ap) in aps.items():
 		if ipOnly != ip:
 			d('This access point\'s IP "' + ip + '" doesn\'t match the requested access point\'s IP "' + ipOnly + '". Skipping.')
 			continue
+
+	if enableWait:
+		seconds = random.randint(0,8)
+		d('Chose to sleep ' + str(seconds) + ' random seconds in hope of being able to reuse JSON cache')
+		time.sleep(seconds)
 
 	d('Connecting to access point "' + apName + '" with IP "' + ip + '"')
 	jsonRaw = UniFiMcaDump(ip,username,password,privatekeypath)
