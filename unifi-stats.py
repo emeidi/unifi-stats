@@ -322,6 +322,8 @@ if args.verbose:
 if args.enablewait:
 	d('Enabling random wait as requested by command line')
 	enableWait = True
+else:
+	enableWait = False
 
 if args.ip:
 	ipOnly = args.ip
