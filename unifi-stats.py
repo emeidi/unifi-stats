@@ -13,6 +13,7 @@ import random
 
 # Configuration
 verbose=False
+maxCacheAgeInSeconds=70
 
 scriptPath = os.path.dirname(os.path.abspath(__file__))
 
@@ -39,12 +40,12 @@ def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
 		now = int(time.time())
 		diff = now - then
 
-		if diff < 60:
-			d('Cache file ' + cacheFile + ' is younger than 60 seconds (' + str(diff) + ' seconds). Using cached data instead of querying access point.')
+		if diff < maxCacheAgeInSeconds:
+			d('Cache file ' + cacheFile + ' is younger than ' + maxCacheAgeInSeconds + ' seconds (' + str(diff) + ' seconds). Using cached data instead of querying access point.')
 			json = open(cacheFile).read()
 			return json
 		else:
-			d('Cache file ' + cacheFile + ' is older than 60 seconds (' + str(diff) + ' seconds). Performing SSH connection.')
+			d('Cache file ' + cacheFile + ' is older than ' + maxCacheAgeInSeconds + ' seconds (' + str(diff) + ' seconds). Performing SSH connection.')
 
 	try:
 		ssh = paramiko.SSHClient()
@@ -387,8 +388,8 @@ for (apName, ap) in aps.items():
 			continue
 
 	if enableWait:
-		seconds = random.randint(0,8)
-		d('Chose to sleep ' + str(seconds) + ' random seconds in hope of being able to reuse JSON cache')
+		seconds = random.randint(1,15)
+		d('Chose to sleep ' + str(seconds) + ' random seconds in hope of being able to reuse by then populated JSON cache')
 		time.sleep(seconds)
 
 	d('Connecting to access point "' + apName + '" with IP "' + ip + '"')
