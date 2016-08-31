@@ -12,8 +12,9 @@ import json
 import random
 
 # Configuration
-verbose=False
-maxCacheAgeInSeconds=70
+verbose = False
+maxCacheAgeInSeconds = 70
+cacheUsed = False
 
 scriptPath = os.path.dirname(os.path.abspath(__file__))
 
@@ -31,6 +32,8 @@ def d(msg):
 	print msg
 
 def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
+	global cacheUsed
+
 	cacheFile = '/tmp/unifi_' + ip + '.json'
 
 	if os.path.isfile(cacheFile):
@@ -41,11 +44,13 @@ def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
 		diff = now - then
 
 		if diff < maxCacheAgeInSeconds:
-			d('Cache file ' + cacheFile + ' is younger than ' + maxCacheAgeInSeconds + ' seconds (' + str(diff) + ' seconds). Using cached data instead of querying access point.')
+			d('Cache file ' + cacheFile + ' is younger than ' + str(maxCacheAgeInSeconds) + ' seconds (' + str(diff) + ' seconds). Using cached data instead of querying access point.')
+			cacheUsed = True
+
 			json = open(cacheFile).read()
 			return json
 		else:
-			d('Cache file ' + cacheFile + ' is older than ' + maxCacheAgeInSeconds + ' seconds (' + str(diff) + ' seconds). Performing SSH connection.')
+			d('Cache file ' + cacheFile + ' is older than ' + str(maxCacheAgeInSeconds) + ' seconds (' + str(diff) + ' seconds). Performing SSH connection.')
 
 	try:
 		ssh = paramiko.SSHClient()
@@ -294,6 +299,13 @@ def printCacti(data):
 	for (key, val) in data.items():
 		string = str(key) + ':' + str(val)
 		elements.append(string)
+
+	if cacheUsed:
+		cacheUsedInt = 1
+	else:
+		cacheUsedInt = 0
+
+	elements.append('CACHE:' + str(cacheUsedInt))
 
 	out = ' '.join(elements)
 
