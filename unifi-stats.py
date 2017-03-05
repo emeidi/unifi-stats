@@ -23,6 +23,8 @@ configPath = scriptPath + '/config.yaml'
 debugPath = scriptPath + '/debug.txt'
 debugFile = codecs.open(debugPath,'w','utf-8')
 
+sshDefaultLogFilePath = '/tmp/unifi-stats.ssh.log'
+
 def d(msg):
 	debugFile.write(msg + "\n")
 
@@ -54,6 +56,7 @@ def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
 
 	try:
 		ssh = paramiko.SSHClient()
+        paramiko.util.log_to_file(sshLogFilePath)
 		ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 		if len(privateKeyPath) > 0:
@@ -322,7 +325,7 @@ parser.add_argument('--enablewait', help='Enable a randomly chosen wait period t
 parser.add_argument('--output', metavar='[clients|bytes|packets|errors|rssi_low|rssi_high]', choices=['clients','bytes','packets','errors','rssi_low','rssi_high'], help='What specific data to output', required=True)
 parser.add_argument('--output-format', metavar='[cacti]', choices=['cacti'], help='The output format for results. Currently only cacti is supported', required=False)
 parser.add_argument('--verbose', help='Print debug information', action="store_true", required=False)
-
+parser.add_argument('--sshlog', metavar='STRING', help='Where to log Paramikos SSH module info to. If not provided defaults to "' + sshDefaultLogFilePath + '"', required=False)
 
 args = parser.parse_args()
 
@@ -343,6 +346,11 @@ if args.ip:
 	d('Enabling querying only the access point with IP ' + ipOnly)
 else:
 	ipOnly = ''
+
+if args.sshlog:
+    sshLogFilePath = args.sshlog
+else:
+    sshLogFilePath = sshDefaultLogFilePath
 
 # Read Config
 # ======================================================================
