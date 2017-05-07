@@ -414,7 +414,7 @@ for (apName, ap) in aps.items():
             continue
 
     if enableWait:
-        seconds = random.randint(1,15)
+        seconds = random.randint(1,10)
         d('Chose to sleep ' + str(seconds) + ' random seconds in hope of being able to reuse by then populated JSON cache')
         time.sleep(seconds)
 
