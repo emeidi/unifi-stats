@@ -33,6 +33,7 @@ def d(msg):
 
     print msg
 
+@profile
 def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
     global cacheUsed
 
@@ -56,7 +57,12 @@ def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
 
     try:
         ssh = paramiko.SSHClient()
-        paramiko.util.log_to_file(sshLogFilePath)
+
+        if verbose == True:
+            # Very time consuming, only invoke it if the user wants verbose output
+            d('Logging SSH to "' + sshLogFilePath + '"')
+            passparamiko.util.log_to_file(sshLogFilePath)
+
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         if len(privateKeyPath) > 0:
