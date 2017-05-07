@@ -33,7 +33,7 @@ def d(msg):
 
     print msg
 
-@profile
+#@profile
 def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
     global cacheUsed
 
