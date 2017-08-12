@@ -61,7 +61,7 @@ def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
         if verbose == True:
             # Very time consuming, only invoke it if the user wants verbose output
             d('Logging SSH to "' + sshLogFilePath + '"')
-            passparamiko.util.log_to_file(sshLogFilePath)
+            paramiko.util.log_to_file(sshLogFilePath)
 
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -78,8 +78,10 @@ def UniFiMcaDump(ip,username,password,privateKeyPath = ''):
 
         d("Connected to " + ip)
     #except paramiko.AuthenticationException:
-    except:
+    except Exception, e:
         d("Authentication failed when connecting to " + ip)
+        #e = sys.exc_info()[0]
+        print e
         sys.exit(1)
 
     stdin, stdout, stderr = ssh.exec_command("mca-dump")
